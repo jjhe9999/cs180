@@ -32,6 +32,7 @@ body {
   display: block;
   width: 100%;
   max-width: 200px;
+  height: auto;
   border-radius: 12px;
 }
 
@@ -85,6 +86,7 @@ body {
 
 .image-container img {
   width: 150px;
+  max-width: 50px;
   height: auto;
   border-radius: 8px solid #ffffff;
 }
