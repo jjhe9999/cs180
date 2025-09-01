@@ -1,3 +1,4 @@
+html,
 body {
   background: black;
   text-align: center;
@@ -30,7 +31,7 @@ body {
 .proj-link-container img {
   display: block;
   width: 100%;
-  max-width: 600px;
+  max-width: 200px;
   border-radius: 12px;
 }
 
@@ -56,9 +57,10 @@ body {
     45deg,
     #ebddca,
     #b6d2dd,
-    #dea4bd /* #a581c4,
+    #dea4bd,
+    #a581c4,
     #60cbb6,
-    #8adcde */
+    #8adcde
   );
   background-size: 300% 300%;
   animation: mbglow 10s ease-in-out infinite alternate;
