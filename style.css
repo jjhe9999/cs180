@@ -28,8 +28,10 @@ body {
 }
 
 .return-home-container {
-  text-align: right;
-  margin: 1rem;
+  position: fixed; /* fix it to the viewport */
+  top: 1rem; /* distance from the top */
+  right: 1rem; /* distance from the right */
+  z-index: 1000; /* make sure it’s above other content */
 }
 
 .return-home-container a:link,
@@ -39,6 +41,7 @@ body {
   color: white;
   text-decoration: underline;
   font-size: 0.9rem;
+  padding: 0.1rem 0.3rem;
 }
 
 .proj-link-container {
