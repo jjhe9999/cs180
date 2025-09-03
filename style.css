@@ -8,6 +8,10 @@ body {
   padding: 2rem;
 }
 
+.project-title {
+  text-align: left;
+}
+
 .glowing-title {
   color: #ffee00;
   font-size: 3rem;
@@ -21,6 +25,16 @@ body {
   to {
     filter: drop-shadow(0 0 40px yellow);
   }
+}
+
+.return-home-container {
+  text-align: right;
+  margin: 1rem;
+}
+
+.return-home-container a {
+  text-decoration: underline;
+  font-size: 0.9rem;
 }
 
 .proj-link-container {
