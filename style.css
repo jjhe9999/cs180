@@ -32,7 +32,11 @@ body {
   margin: 1rem;
 }
 
-.return-home-container a {
+.return-home-container a:link,
+.return-home-container a:visited,
+.return-home-container a:hover,
+.return-home-container a:active {
+  color: white;
   text-decoration: underline;
   font-size: 0.9rem;
 }
