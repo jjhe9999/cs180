@@ -1,7 +1,7 @@
 html,
 body {
   background: black;
-  /* text-align: center; */
+  text-align: center;
   font-family: "Times New Roman", serif;
   color: white;
   margin: 0;
@@ -10,7 +10,6 @@ body {
 
 .glowing-title {
   color: #ffee00;
-  text-align: center;
   font-size: 3rem;
   filter: drop-shadow(0 0 30px rgb(255, 217, 0));
   animation: glow 1s ease-in-out infinite alternate;
@@ -93,5 +92,6 @@ body {
 }
 
 ol li {
-  margin-bottom: 2rem;
+  margin-bottom: 5rem;
+  text-align: left;
 }
