@@ -38,8 +38,8 @@ body {
 }
 
 .proj-link-container {
-  position: relative;
-  display: inline-block;
+  text-align: center;
+  margin: 2rem 0;
 }
 
 .proj-link-container img {
@@ -59,9 +59,6 @@ body {
 
 .proj-link-container .button {
   /* position: absolute; */
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
   display: inline-block;
   padding: 1rem 2rem;
   border: 5px solid #ffffff;
