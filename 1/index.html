@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>proj one</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div class="return-home-container">
+      <a class="button" href="../index.html">home</a>
+    </div>
+    <h1 class="project-title">project one</h1>
+
+    <div class="proj-one-container">
+      <h2>section one: Overview, My Approach, and Problems</h2>
+        <div>
+            <p>
+                <u>overview:<br /></u>
+              
+                The goal of this project was that, given digitized Prokudin-Gorskii glass plate images, to produce a single color RGB image.
+                The input images were special because each input "image" file actually contained 3 images vertically stacked, each image representing
+                one color channel. To essentially combine them into one and produce the single color RGB image, I had to align them in a way so that 
+                the image would look as accurate as possible and minimize aliasing/artifacts.
+              </p>
+              
+              <p>
+                <u>my approach:<br /></u>
+              
+                As the spec suggested, I split the large image into 3 and tried to align the G and R parts of the image to the B part of the image.
+                To find the "best" alignment, I first relied on the L2 norm as the metric to use.
+              </p>
+              
+              <ol>
+                <li>
+                  My naive method included scoring with the L2 norm and, over a window of [-15, 15] displacements, would calculate the L2 norm between
+                  the B and the other image in consideration, and use the displacement that produced the minimum deviation (smaller L2 score) to shift
+                  the G and R images separately.
+                </li>
+                <li>
+                  My improved method relied on the pyramid alignment procedure. This involved first downsampling all the channels to have “smaller” images
+                  that encoded less data (and thus were less detailed than the actual images). I'd start out with the naive method, finding the best displacement 
+                  for this smaller image, which was relatively fast. Then I'd upscale the image by a factor of 2.0 at a time, keeping track of the "best displacement"
+                  seen so far, and at every iteration also trying a small window of about [-6, 6] for other good displacements that may have been missed in the previous
+                  downsampled step. I'd repeat until the image was the original size and use the best displacement found at the end.
+                </li>
+                <li>
+                  After using the pyramid method, I wondered if I could make it look better with a different metric because the images still looked
+                  a little bit off to me. So I used the NCC metric, but inversely (so larger scores were better), which did seem to improve image alignments.
+                </li>
+              </ol>
+              
+              <p>
+                <u>some problems I encountered:</u>
+              </p>
+              <ol>
+                <li>
+                  How to reason with row/column shifts. After some trial and error, I discovered <code>dx</code> referred to column shifts, which I later 
+                  confirmed with use of a coordinate system, and then after that, intuition. Because columns must be moved side-to-side. So when I called the
+                  <code>np.roll()</code> function, I had to make sure to feed in the parameter <code>shift=(dy, dx)</code> instead of the other way around.
+                </li>
+                <li>
+                  Figuring out how to choose the right number of levels for the pyramid align method. For example, using too many levels may lose
+                  too much information in the beginning.
+                </li>
+              </ol>              
+        </div>
+
+      <h2>section two: image results:</h2>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/final_monastery.jpg" alt="Monastery result" />
+          <figcaption>
+            monastery.jpg <br />
+            Green Shift: (-3, 1) <br />
+            Red Shift: (3, 2)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/final_cathedral.jpg" alt="Cathedral result" />
+          <figcaption>
+            cathedral.jpg <br />
+            Green Shift: (1, -1) <br />
+            Red Shift: (7, -1)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/final_tobolsk.jpg" alt="tobolsk result" />
+          <figcaption>
+            tobolsk.jpg <br />
+            Green Shift: (3, 2) <br />
+            Red Shift: (6, 3)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/emir.jpg" alt="emir result" />
+          <figcaption>
+            emir.tif as .jpg <br />
+            Green Shift: (-3, 7) <br />
+            Red Shift: (107, 17)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/harvesters.jpg" alt="harvesters result" />
+          <figcaption>
+            harvesters.tif as .jpg <br />
+            Green Shift: (118, -3) <br />
+            Red Shift: (120, 7)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/icon.jpg" alt="icon result" />
+          <figcaption>
+            icon.tif as .jpg <br />
+            Green Shift: (42, 16) <br />
+            Red Shift: (89, 22)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/italil.jpg" alt="italil result" />
+          <figcaption>
+            italil.tif as .jpg <br />
+            Green Shift: (38, 18) <br />
+            Red Shift: (78, 34)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/lastochikino.jpg" alt="lastochikino result" />
+          <figcaption>
+            lastochikino.tif as .jpg <br />
+            Green Shift: (-4, -2) <br />
+            Red Shift: (144, -3)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/lugano.jpg" alt="lugano result" />
+          <figcaption>
+            lugano.tif as .jpg <br />
+            Green Shift: (3, -10) <br />
+            Red Shift: (81, -21)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/melons.jpg" alt="melons result" />
+          <figcaption>
+            melons.tif as .jpg <br />
+            Green Shift: (83, 4) <br />
+            Red Shift: (176, 7)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/self_portrait.jpg" alt="self_portrait result" />
+          <figcaption>
+            self_portrait.tif as .jpg <br />
+            Green Shift: (50, -2) <br />
+            Red Shift: (130, -5)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img src="../images/siren.jpg" alt="siren result" />
+          <figcaption>
+            siren.tif as .jpg <br />
+            Green Shift: (48, -7) <br />
+            Red Shift: (96, -21)
+          </figcaption>
+        </figure>
+
+        <figure>
+          <img
+            src="../images/three_generations.jpg"
+            alt="three_generations result"
+          />
+          <figcaption>
+            three_generations.tif as .jpg <br />
+            Green Shift: (52, 5) <br />
+            Red Shift: (108, 7)
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>section three: prokudin-gorskii images:</h2>
+
+      <div class="results-grid">
+        <figure>
+          <img src="../images/pg-1.jpg" alt="Custom result 1" />
+          <figcaption>etruscan vase</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/pg-2.jpg" alt="Custom result 2" />
+          <figcaption>group of people on a rug, in front of a yurt</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/pg-3.jpg" alt="Custom result 3" />
+          <figcaption>a model of a boat</figcaption>
+        </figure>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,15 +1,18 @@
 html,
 body {
-  background: black;
-  text-align: center;
+  background: #000;
+  color: #fff;
   font-family: "Times New Roman", serif;
-  color: white;
   margin: 0;
-  padding: 2rem;
+  padding: 1rem 2rem;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .project-title {
   text-align: left;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 .glowing-title {
@@ -18,6 +21,7 @@ body {
   filter: drop-shadow(0 0 30px rgb(255, 217, 0));
   animation: glow 1s ease-in-out infinite alternate;
 }
+
 @keyframes glow {
   from {
     filter: drop-shadow(0 0 5px yellow);
@@ -28,50 +32,71 @@ body {
 }
 
 .return-home-container {
-  position: fixed; /* fix it to the viewport */
-  top: 1rem; /* distance from the top */
-  right: 1rem; /* distance from the right */
-  z-index: 1000; /* make sure it’s above other content */
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
 }
 
-.return-home-container a:link,
-.return-home-container a:visited,
-.return-home-container a:hover,
-.return-home-container a:active {
-  color: white;
+.return-home-container a {
+  color: #fff;
   text-decoration: underline;
   font-size: 0.9rem;
-  padding: 0.1rem 0.3rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.proj-one-container {
+  text-align: left;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.proj-one-container h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.proj-one-container p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.proj-one-container ol {
+  margin-left: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-left: 0;
+}
+
+.proj-one-container li {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.2;
 }
 
 .proj-link-container {
-  text-align: center;
-  margin: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 .proj-link-container img {
-  display: block;
   width: 100%;
-  max-width: 200px;
-  height: auto;
-  border-radius: 12px;
+  max-width: 180px;
+  border-radius: 10px;
 }
 
-/* .proj-link-container .button {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-} */
-
 .proj-link-container .button {
-  /* position: absolute; */
-  display: inline-block;
-  padding: 1rem 2rem;
-  border: 5px solid #ffffff;
-  color: white;
+  display: block;
+  padding: 0.8rem 1.8rem;
+  margin-top: 0.5rem;
+  border: 3px solid #fff;
+  font-size: 1.2rem;
+  color: #fff;
   text-decoration: none;
-  font-size: 1.5rem;
+  border-radius: 8px;
   background: linear-gradient(
     45deg,
     #ebddca,
@@ -84,6 +109,7 @@ body {
   background-size: 300% 300%;
   animation: mbglow 10s ease-in-out infinite alternate;
 }
+
 @keyframes mbglow {
   0% {
     background-position: 25% 50%;
@@ -96,19 +122,41 @@ body {
   }
 }
 
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.results-grid img {
+  width: 100%;
+  height: auto; /* keep original aspect ratio */
+  object-fit: contain; /* prevents cropping */
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.results-grid figure {
+  margin: 0;
+  text-align: center;
+}
+
+.results-grid figcaption {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
 .image-container {
   display: flex;
   gap: 10px;
-  margin-top: 5px;
+  margin-top: 0.5rem;
 }
 
 .image-container img {
   width: 150px;
   height: auto;
-  border-radius: 8px solid #ffffff;
-}
-
-ol li {
-  margin-bottom: 5rem;
-  text-align: left;
+  border-radius: 8px;
+  border: 1px solid #fff;
 }
