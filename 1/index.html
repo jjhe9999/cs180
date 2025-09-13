@@ -25,6 +25,9 @@
               
               <p>
                 <u>my approach:<br /></u>
+
+                I ended up using NCC and pyramid alignment with edge cropping of 25%. Except <code>emir.tif</code>, which I didn't use edge detection for and the <code>.jpg</code>
+                images, where I just used the naive approach.
               
                 As the spec suggested, I split the large image into 3 and tried to align the G and R parts of the image to the B part of the image.
                 To find the "best" alignment, I first relied on the L2 norm as the metric to use.
@@ -40,12 +43,20 @@
                   My improved method relied on the pyramid alignment procedure. This involved first downsampling all the channels to have “smaller” images
                   that encoded less data (and thus were less detailed than the actual images). I'd start out with the naive method, finding the best displacement 
                   for this smaller image, which was relatively fast. Then I'd upscale the image by a factor of 2.0 at a time, keeping track of the "best displacement"
-                  seen so far, and at every iteration also trying a small window of about [-6, 6] for other good displacements that may have been missed in the previous
-                  downsampled step. I'd repeat until the image was the original size and use the best displacement found at the end.
+                  seen so far, and at every iteration also trying a small window of about [-5, 5] for other good displacements that may have been missed in the previous
+                  downsampled step. I'd repeat until the image was the original size and use the best displacement found at the end. I used 6 levels, counting it such that
+                  the smallest I ever scaled the image was 1/32 of the original size.
                 </li>
                 <li>
                   After using the pyramid method, I wondered if I could make it look better with a different metric because the images still looked
                   a little bit off to me. So I used the NCC metric, but inversely (so larger scores were better), which did seem to improve image alignments.
+                </li>
+                <li>
+                  Then, I introduced very simple edge cropping via a single defined edge cropping of 25%. I centered it so that the resultant image would be aligned only
+                  according to the inner 75% (so 25% was cropped away). The intuition for this is that the "center"/subject of the image is typically more relevant in calculating
+                  the score. Once I incorporated this, my images significantly improved. It's important to note that <code>emir.tif</code> didn't seem to improve
+                  with both more and less aggressive crops. It seems that there is a different issue that stems from what I believe to be the significant difference
+                  of the red and blue channels within his clothing and the duplicate patterns contained within it.
                 </li>
               </ol>
               
@@ -62,35 +73,40 @@
                   Figuring out how to choose the right number of levels for the pyramid align method. For example, using too many levels may lose
                   too much information in the beginning.
                 </li>
+                <li>
+                  As mentioned earlier, edge cropping didn't make every image better. In the case of <code>emir.tif</code>, it seemed to make things worse.
+                  It seems to be affected by a different issue that stems from what I believe to be the significant difference
+                  of the red and blue channels within his clothing and the duplicate patterns contained within it.
+                </li>
               </ol>              
         </div>
 
       <h2>section two: image results:</h2>
       <div class="results-grid">
         <figure>
-          <img src="../images/final_monastery.jpg" alt="Monastery result" />
+          <img src="../images/new-monastery.jpg" alt="Monastery result" />
           <figcaption>
             monastery.jpg <br />
-            Green Shift: (-3, 1) <br />
-            Red Shift: (3, 2)
+            Green Shift: (2, -3) <br />
+            Red Shift: (2, 3)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/final_cathedral.jpg" alt="Cathedral result" />
+          <img src="../images/new-cathedral.jpg" alt="Cathedral result" />
           <figcaption>
             cathedral.jpg <br />
-            Green Shift: (1, -1) <br />
-            Red Shift: (7, -1)
+            Green Shift: (2, 5) <br />
+            Red Shift: (3, 12)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/final_tobolsk.jpg" alt="tobolsk result" />
+          <img src="../images/new-tobolsk.jpg" alt="tobolsk result" />
           <figcaption>
             tobolsk.jpg <br />
-            Green Shift: (3, 2) <br />
-            Red Shift: (6, 3)
+            Green Shift: (3, 3) <br />
+            Red Shift: (3, 6)
           </figcaption>
         </figure>
 
@@ -104,86 +120,86 @@
         </figure>
 
         <figure>
-          <img src="../images/harvesters.jpg" alt="harvesters result" />
+          <img src="../images/new-harvesters.jpg" alt="harvesters result" />
           <figcaption>
             harvesters.tif as .jpg <br />
-            Green Shift: (118, -3) <br />
-            Red Shift: (120, 7)
+            Green Shift: (17, 59) <br />
+            Red Shift: (14, 123)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/icon.jpg" alt="icon result" />
+          <img src="../images/new-icon.jpg" alt="icon result" />
           <figcaption>
             icon.tif as .jpg <br />
-            Green Shift: (42, 16) <br />
-            Red Shift: (89, 22)
+            Green Shift: (17, 40) <br />
+            Red Shift: (23, 89)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/italil.jpg" alt="italil result" />
+          <img src="../images/new-italil.jpg" alt="italil result" />
           <figcaption>
             italil.tif as .jpg <br />
-            Green Shift: (38, 18) <br />
-            Red Shift: (78, 34)
+            Green Shift: (21, 38) <br />
+            Red Shift: (35, 77)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/lastochikino.jpg" alt="lastochikino result" />
+          <img src="../images/new-lastochikino.jpg" alt="lastochikino result" />
           <figcaption>
             lastochikino.tif as .jpg <br />
-            Green Shift: (-4, -2) <br />
-            Red Shift: (144, -3)
+            Green Shift: (-2, -3) <br />
+            Red Shift: (-9, 75)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/lugano.jpg" alt="lugano result" />
+          <img src="../images/new-lugano.jpg" alt="lugano result" />
           <figcaption>
             lugano.tif as .jpg <br />
-            Green Shift: (3, -10) <br />
-            Red Shift: (81, -21)
+            Green Shift: (-16, 41) <br />
+            Red Shift: (-29, 93)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/melons.jpg" alt="melons result" />
+          <img src="../images/new-melons.jpg" alt="melons result" />
           <figcaption>
             melons.tif as .jpg <br />
-            Green Shift: (83, 4) <br />
-            Red Shift: (176, 7)
+            Green Shift: (10, 81) <br />
+            Red Shift: (14, 178)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/self_portrait.jpg" alt="self_portrait result" />
+          <img src="../images/new-self_portrait.jpg" alt="self_portrait result" />
           <figcaption>
             self_portrait.tif as .jpg <br />
-            Green Shift: (50, -2) <br />
-            Red Shift: (130, -5)
+            Green Shift: (29, 78) <br />
+            Red Shift: (37, 176)
           </figcaption>
         </figure>
 
         <figure>
-          <img src="../images/siren.jpg" alt="siren result" />
+          <img src="../images/new-siren.jpg" alt="siren result" />
           <figcaption>
             siren.tif as .jpg <br />
-            Green Shift: (48, -7) <br />
-            Red Shift: (96, -21)
+            Green Shift: (-6, 49) <br />
+            Red Shift: (-24, 96)
           </figcaption>
         </figure>
 
         <figure>
           <img
-            src="../images/three_generations.jpg"
+            src="../images/new-three_generations.jpg"
             alt="three_generations result"
           />
           <figcaption>
             three_generations.tif as .jpg <br />
-            Green Shift: (52, 5) <br />
-            Red Shift: (108, 7)
+            Green Shift: (14, 52) <br />
+            Red Shift: (12, 111)
           </figcaption>
         </figure>
       </div>
