@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Project 2: Fun with Filters and Frequencies!</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div class="return-home-container">
+      <a class="button" href="../index.html">home</a>
+    </div>
+
+    <h1 class="project-title">project two</h1>
+    <section>
+      <h2>part 1: fun with filters~</h2>
+
+      <h3>1.1: Convolutions from Scratch</h3>
+      <h4>convolution with 4 for loops: </h4>
+        <pre><code class="language-python">
+        
+def four_loop_convolution(arr, kernel):
+    m1, n1 = arr.shape
+    m2, n2 = kernel.shape
+    px, py = m2//2, n2//2
+    padded_arr = np.pad(arr, ((px, px), (py, py)), 'constant')
+    res = np.zeros_like(arr)
+
+    for i1 in range(m1):
+    for j1 in range(n1):
+        total = 0.0
+        for i2 in range(m2):
+        for j2 in range(n2):
+            total += padded_arr[i1+i2][j1+j2] * kernel[i2][j2]
+        res[i1][j1] = total
+    return res
+        </code></pre>
+
+        <h4>(better) convolution with 2 for loops: </h4>
+        <pre><code class="language-python">
+def convolve(arr, kernel):
+    m1, n1 = arr.shape
+    m2, n2 = kernel.shape
+    px, py = m2//2, n2//2
+    padded_arr = np.pad(arr, ((px, px), (py, py)), 'constant')
+    res = np.zeros_like(arr)
+    
+    for i1 in range(m1):
+        for j1 in range(n1):
+        res[i1][j1] = np.sum(padded_arr[i1:i1+m2, j1:j1+n2] * kernel)
+    
+    return res
+        </code></pre>
+      <div class="results-grid">
+        <figure>
+            <img src="../images/1-1-selfie.jpg" alt="gray selfie" />
+            <figcaption>grayscale + before convolution</figcaption>
+          </figure>
+        <figure>
+          <img src="../images/boxfilter_result.jpg" alt="Box filter result" />
+          <figcaption>box filter w my own convolution method!</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="../images/boxfilter_scipy_result.jpg"
+            alt="Box filter result scipy"
+          />
+          <figcaption>box filter w scipy's convolution method</figcaption>
+        </figure>
+          <img src="../images/dx_convolution_1_1.jpg" alt="dx result" />
+          <figcaption>D_x operator w my own convolution method</figcaption>
+        </figure>
+        </figure>
+            <img src="../images/dx_convolution_scipy_1_1.jpg" alt="scipydx result" />
+            <figcaption>D_x operator w scipy's convolution method</figcaption>
+        </figure>
+        </figure>
+            <img src="../images/dy_convolution_1_1.jpg" alt="dy result" />
+            <figcaption>D_y operator w my own convolution method</figcaption>
+        </figure>
+        </figure>
+            <img src="../images/dy_convolution_scipy_1_1.jpg" alt="scipydy result" />
+            <figcaption>D_y operator w scipy's convolution method</figcaption>
+        </figure>
+        
+      </div>
+
+      <h3>1.2: Finite Difference Operator</h3>
+      <p>Show Dx, Dy, gradient magnitude, and binarized edge results.</p>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/1-2-cameraman.jpg" alt="cameraman og" />
+          <figcaption>original cameraman image</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/1-2-cameraman-dx.jpg" alt="Dx convolve cameraman result" />
+          <figcaption>cameraman convolved with the D_x operator</figcaption>
+        </figure>
+        <figure>
+            <img src="../images/1-2-cameraman-dy.jpg" alt="D_y convolve cameraman result" />
+            <figcaption>cameraman convolved with the D_y operator</figcaption>
+          </figure>
+        <figure>
+          <img src="../images/1-2-gradmag.jpg" alt="gradient magnitude" />
+          <figcaption>gradient magnitude image</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/1-2-edge-image.jpg" alt="edge image" />
+          <figcaption>edge image (threshold = __)</figcaption>
+        </figure>
+      </div>
+
+      <h3>1.3: Derivative of Gaussian (DoG) Filter</h3>
+      
+      <div class="results-grid">
+        <p>
+            Any differences I see are noted here:
+            ___
+            __
+            _
+        </p>
+        <figure>
+            <img src="../images/1-3-blurred.jpg" alt="DoG X" />
+            <figcaption>blurred from convolution with Gaussian</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/1-3-blurred.jpg" alt="DoG X" />
+            <figcaption>convolved with Gaussian (blurred) and D_x operator</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/1-3-blurred.jpg" alt="DoG X" />
+            <figcaption>convolved with Gaussian (blurred) and D_y operator</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/1-3-blurred-grad-mag.jpg" alt="DoG X" />
+            <figcaption>gradient magnitude for blurred img</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/1-3-edge.jpg" alt="DoG X" />
+            <figcaption>edge img for blurred img</figcaption>
+          </figure>
+        <figure>
+          <img src="../images/dog_x.jpg" alt="DoG X" />
+          <figcaption>DoG_X convolved image</figcaption>
+        </figure>
+        <figure>
+            <img src="../images/dog_y.jpg" alt="DoG Y" />
+            <figcaption>DoG_Y convolved image</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>part 2: fun with frequencies !!</h2>
+
+      <h3>2.1: Image Sharpening</h3>
+      <p>
+        Unsharp masking technique:
+      </p>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/sharpen_taj.jpg" alt="taj" />
+          <figcaption>original image</figcaption>
+        </figure>
+        <figure>
+            <img src="../images/sharpen_taj.jpg" alt="taj" />
+            <figcaption>low freq image (blurred by gaussian)</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/sharpen_taj.jpg" alt="taj" />
+            <figcaption>final sharpened image; high freq image (original image subtracted by low freq image)</figcaption>
+          </figure>
+      </div>
+      <p>
+        resharpening:
+      </p>
+      <div class="results-grid">
+        <figure>
+            <img src="../images/sharpen_taj.jpg" alt="taj" />
+            <figcaption>original already sharp image</figcaption>
+          </figure>
+          <figure>
+              <img src="../images/sharpen_taj.jpg" alt="taj" />
+              <figcaption>blurring sharp image w gaussian</figcaption>
+            </figure>
+            <figure>
+              <img src="../images/sharpen_taj.jpg" alt="taj" />
+              <figcaption>resharpening</figcaption>
+            </figure>
+      </div>
+
+      <p> Commenting on my resharpening and frist thing results. maybe notice resharpening is sharper than ever also because I used
+        this ____ particular number/threshold
+      </p>
+
+      <h3>2.2: Hybrid Images</h3>
+      <p>
+        here is my workflow of making derek + nutmeg into a hybrid image.
+
+        i ended up using _ value for gaussian?
+      </p>
+      <div class="results-grid">
+        <figure>
+            <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+            <figcaption>input image 1 (derek)</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+            <figcaption>input image 2 (nutmeg)</figcaption>
+          </figure>
+          <figure>
+            <figure>
+            <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+            <figcaption>low-freq filtered input image 1 (derek)</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+            <figcaption>high-freq filtered input image 2 (nutmeg)</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/my_hybrid2.jpg" alt="Hybrid result 2" />
+            <figcaption>hybrid image</figcaption>
+          </figure>
+    </div>
+      <p>
+        here are some results of taking the log magnitude of the Fourier Transform of the following:
+      </p>
+     <div class="results-grid">
+      <figure>
+        <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+        <figcaption>input image 1 (derek)</figcaption>
+      </figure>
+      <figure>
+        <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+        <figcaption>input image 2 (nutmeg)</figcaption>
+      </figure>
+      <figure>
+        <figure>
+        <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+        <figcaption>low-freq filtered input image 1 (derek)</figcaption>
+      </figure>
+      <figure>
+        <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+        <figcaption>high-freq filtered input image 2 (nutmeg)</figcaption>
+      </figure>
+      <figure>
+        <img src="../images/my_hybrid2.jpg" alt="Hybrid result 2" />
+        <figcaption>hybrid image</figcaption>
+      </figure>
+    </div>
+
+      <p>
+        here are some more hybrid images!
+      </p>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+          <figcaption>ex1.1</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+          <figcaption>ex1.2</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/my_hybrid2.jpg" alt="Hybrid result 2" />
+          <figcaption>merging!</figcaption>
+        </figure>
+
+        <figure>
+            <img src="../images/derek_nutmeg.jpg" alt="Hybrid result" />
+            <figcaption>ex2.1</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/my_hybrid1.jpg" alt="Hybrid result 1" />
+            <figcaption>ex2.2</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/my_hybrid2.jpg" alt="Hybrid result 2" />
+            <figcaption>merging!</figcaption>
+          </figure>
+      </div>
+
+      <h3>2.3: Gaussian and Laplacian Stacks</h3>
+      <p>
+        here are my stacks for the apple and orange:
+      </p>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/gaussian_stack.jpg" alt="Gaussian stack" />
+          <figcaption>gaussian stack (apple)</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/laplacian_stack.jpg" alt="Laplacian stack" />
+          <figcaption>laplacian stack (apple)</figcaption>
+        </figure>
+        <figure>
+            <img src="../images/gaussian_stack.jpg" alt="Gaussian stack" />
+            <figcaption>gaussian stack (orange)</figcaption>
+          </figure>
+          <figure>
+            <img src="../images/laplacian_stack.jpg" alt="Laplacian stack" />
+            <figcaption>laplacian stack (orange)</figcaption>
+          </figure>
+      </div>
+
+      <h3>2.4: Multiresolution Blending (Oraple!)</h3>
+      <p>
+        Blend apple + orange with vertical mask, then irregular masks, then
+        creative blends.
+      </p>
+      <div class="results-grid">
+        <figure>
+          <img src="../images/oraple.jpg" alt="Oraple" />
+          <figcaption>The Oraple</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/irregular_blend.jpg" alt="Irregular blend" />
+          <figcaption>Irregular blend result</figcaption>
+        </figure>
+        <figure>
+          <img src="../images/custom_blend.jpg" alt="Creative blend" />
+          <figcaption>Custom creative blend</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- =================== REFLECTION =================== -->
+    <section>
+      <h2>Reflection</h2>
+      <p>
+        The most important thing I learned from this project was... (fill in).
+      </p>
+    </section>
+  </body>
+</html>
