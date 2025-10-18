@@ -1,0 +1,303 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>project 3</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body>
+    <div class="return-home-container">
+      <a class="button" href="../index.html">home</a>
+    </div>
+
+    <h2 class="glowing-title">proj 3a</h2>
+
+    <nav class="results-grid quick-nav" aria-label="Part A Navigation">
+      <a href="#a1">A.1 Taking the Pictures</a>
+      <a href="#a2">A.2 Recovering the Homography Matrix</a>
+      <a href="#a3">A.3 Image Warping</a>
+      <a href="#a4">A.4 Mosaic Making</a>
+    </nav>
+
+    <div>
+      <section id="a1">
+        <h2>A.1: Taking the Pictures</h2>
+        <p>
+          here are two sets of images I took with projective transforms between
+          them:
+        </p>
+        <p>set one: BWW</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/bww1.png" alt="Set 1 Image 1" />
+            <figcaption>set 1 – image 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/bww3.png" alt="Set 1 Image 2" />
+            <figcaption>set 1 – image 2</figcaption>
+          </figure>
+        </div>
+        <p>set two: vlsb circulation desk</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/circ_l.png" alt="Set 2 Image 1" />
+            <figcaption>Set 2 – Image 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/circ_m.png" alt="Set 2 Image 2" />
+            <figcaption>Set 2 – Image 2</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="a2">
+        <h2>A.2: Recovering the Homography Matrix</h2>
+        <p>briefly on how i implemented compute H:</p>
+        <p>
+          i implemented
+          <code>computeH(im1_pts, im2_pts)</code> to solve for H, using 6
+          corresponding pairs of points. H has 8 degrees of freedom so this
+          means solving for 12, which leads to an overtdetermined system, so i
+          just used the least norm solution. to choose the points, i manually
+          chose them via imageonline.io.
+        </p>
+        <p>
+          As for the actual math, you are trying to solve the equation
+          <code>Ah = 0</code>. Given an <code>(x, y)</code> point, we get some
+          correspondence like so:
+        </p>
+        <pre><code>
+[-x1  -y1  -1   0    0    0   x2x1   x2y1   x2]
+[  0    0   0  -x1  -y1  -1   y2x1   y2y1   y2]
+        </code></pre>
+        <p>
+          this ends up being 2 rows of A. so we need to vertically stack this
+          with 4 points (hence earlier with 6 points it's overdetermined, but we
+          need 4 points to solve), to get a solvable matrix.
+          <code>h</code> itself only has 8 free entries, as <code>h₃₃</code> is
+          set to 1. we reformat like so to get the homography matrix:
+        </p>
+        <pre><code>
+[[h11  h12  h13],
+ [h21  h22  h23],
+ [h31  h32    1]]
+        </code></pre>
+        <div class="results-grid">
+          <figure>
+            <img
+              src="./images/a2_correspondences.png"
+              alt="Homography matrix"
+            />
+            <figcaption>correspondences visualized together</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/matrixA.png" alt="Matrix A" />
+            <figcaption>
+              example values of matrix A in which SOE are solved for
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="./images/matrixH.png" alt="Matrix H" />
+            <figcaption>example matrix H for this correspondence</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="a3">
+        <h2>A.3: Image Warping</h2>
+        <p>
+          here is my inverse warping + rectification on the post-it and book.
+          for the book i chose a rough ratio of W:L = 3:4 and it seems to have
+          represented it quite well. between the two methods i don't visually
+          see too much of a difference. and in the post-it note, it entirely
+          cropped out all borders, which i thought was interesting, and it is
+          truly just a square with the hue of the post-it note. though i would
+          expect bilinear to be more true to the actual image (color-wise)
+          because it has more information and more layers of interpolation.
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/post-it.png" alt="Rectification 1" />
+            <figcaption>OG post-it</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/a3_post_it_nn.png" alt="Rectification 2" />
+            <figcaption>rectification on post-it NN</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/a3_post_it_bilinear.png" alt="Rectification 3" />
+            <figcaption>rectification on post-it bilinear</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/book.png" alt="Rectification 1" />
+            <figcaption>OG book</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/a3_book_nn.png" alt="Rectification 2" />
+            <figcaption>rectification on book NN</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/a3_book_bilinear.png" alt="Rectification 3" />
+            <figcaption>rectification on book bilinear</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="a4">
+        <h2>A.4: Mosaic Making</h2>
+        <p>
+          to stitch the images into a mosaic, i wrote three main functions:
+          <code>compute_bounds</code>, <code>mosaic</code>, and
+          <code>mosaic2</code>. the goal here was to take two overlapping
+          images, use the recovered homography to warp them into the same
+          coordinate frame, and then combine them into a single panorama.
+        </p>
+        <p>
+          <code>compute_bounds</code> first finds where the second image’s
+          corners end up after being warped by the homography. it combines those
+          with the corners of the first image to figure out the full area that
+          both images will cover. from that, i calculate the minimum and maximum
+          <code>x</code> and <code>y</code> values, which tell me how big the
+          final canvas should be and how much translation i need to apply so
+          everything fits in positive coordinates.
+        </p>
+        <p>
+          in <code>mosaic</code>, i build a translation matrix
+          <code>T</code> using that offset, and then warp both images into the
+          new mosaic frame using <code>warpBilinear</code>. the first image is
+          warped by <code>T</code>, and the second image is warped by
+          <code>T @ H₂→₁</code>. both warps rely on the bilinear interpolation
+          function i wrote earlier (in part a.3)
+        </p>
+        <p>
+          to actually combine the two warped images, i make simple binary masks
+          to mark where each image has valid pixels. then, i copy over all
+          pixels from the first image, and wherever the second image also has
+          data, i overwrite those regions with its pixels.
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b4_manual_bww.png" alt="Mosaic 1" />
+            <figcaption>mosaic of bww</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b4_manual_circ.png" alt="Mosaic 2" />
+            <figcaption>mosaic of the vlsb circ desk</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b4_manual_balc.png" alt="Mosaic 3" />
+            <figcaption>mosaic of my balcony</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+
+    <div id="part-b">
+      <h2 class="glowing-title">proj 3b</h2>
+
+      <nav class="results-grid quick-nav" aria-label="Part B Navigation">
+        <a href="#b1">B.1 Harris + ANMS</a>
+        <a href="#b2">B.2 Descriptors</a>
+        <a href="#b3">B.3 Matching</a>
+        <a href="#b4">B.4 RANSAC + Mosaics</a>
+      </nav>
+
+      <section id="b1">
+        <h2>B.1: Harris Corner Detection</h2>
+        <p>
+          here is a picture of BWW overlaid with harris corners, and then anms
+          corners.
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b1_harris.png" />
+            <figcaption>harris corner overlay</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b1_anms.png" />
+            <figcaption>anms corner overlay</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="b2">
+        <h2>B.2: Feature Descriptor Extraction</h2>
+        <p>
+          here are some feature descriptors. to implement this, i took 40×40
+          windows located at the previously calculated anms corners (contained
+          completely within the image). then, i downsampled each one till it was
+          an 8×8 patch, and normalized it to have std = 0, mean = 1. then to
+          visualize, i normalized it within the range of [0, 1].
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b2_patches.png" />
+            <figcaption>
+              some 8×8 normalized patches taken from the BWW image (there's 9 of
+              them laid out 3by3 grid)
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="b3">
+        <h2>B.3: Feature Matching</h2>
+        <p>
+          using a Lowe threshold of 0.7, here are the matched features between a
+          pair of BWW images:
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b3_matches.png" />
+            <figcaption>30 matches between the BWW images</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="b4">
+        <h2>B.4: RANSAC for Robust Homography</h2>
+        <p>
+          i implemented a 4-pt RANSAC method. here are 3 mosaics side-by-side
+          using the manual (part A) vs automatic (part B) stitching methods:
+        </p>
+        <h3>Manual vs Automatic Stitching</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b4_manual_bww.png" />
+            <figcaption>manual stitch on BWW</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b4_auto_bww.png" />
+            <figcaption>automatic (RANSAC) stitch on BWW</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b4_manual_balc.png" />
+            <figcaption>manual stitch on my balcony</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b4_auto_balc.png" />
+            <figcaption>automatic (RANSAC) stitch on my balcony</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/b4_manual_circ.png" />
+            <figcaption>manual stitch on the VLSB circulation desk</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/b4_auto_circ.png" />
+            <figcaption>
+              automatic (RANSAC) stitch on the VLSB circulation desk
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

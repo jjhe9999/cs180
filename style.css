@@ -234,3 +234,85 @@ pre code {
 .results-grid p {
   margin-bottom: 1.5rem;
 }
+
+.proj-three-container {
+  text-align: left;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.proj-three-container h2 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.proj-three-container p {
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+}
+
+.proj-three-container ol {
+  margin-left: 1.2rem;
+  margin-bottom: 1.5rem;
+  padding-left: 0;
+}
+
+.proj-three-container li {
+  max-width: 80ch;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* ---------- PROJECT 3 STYLE ENHANCEMENTS ---------- */
+
+img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
+  min-width: 280px;
+  margin: 0 auto;
+  display: block;
+}
+
+figure {
+  text-align: center;
+}
+
+figcaption {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: #c0c0c0;
+}
+
+/* nav link styling for quick jumps */
+.quick-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem auto 2rem;
+  max-width: 800px;
+}
+
+.quick-nav a {
+  text-align: center;
+  font-size: 1rem;
+  color: #f0f0f0;
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #444, #222);
+  transition: all 0.3s ease;
+}
+
+.quick-nav a:hover {
+  background: linear-gradient(135deg, #666, #333);
+  color: #fff;
+  transform: translateY(-2px);
+}
