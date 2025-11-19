@@ -1,0 +1,383 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>proj 4 — neural radiance field</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+
+  <body>
+    <div class="return-home-container">
+      <a class="button" href="../index.html">home</a>
+    </div>
+
+    <h1 class="project-title">proj 4: neural radiance field</h1>
+
+    <div class="proj-one-container">
+      <h2>0. CAMERA CALIBRATION AND 3D SCANNING</h2>
+
+      <section>
+        <h3>viser camera frustums visualization (0.3)</h3>
+        <p>here are 2 screenshots of my camera frustums!</p>
+
+        <div class="results-grid">
+          <figure>
+            <img src="./images/0-3a.png" />
+            <figcaption>camera frustums view 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/0-3b.png" />
+            <figcaption>camera frustums view 2</figcaption>
+          </figure>
+        </div>
+      </section>
+      <br />
+      <br />
+      <h2>1. FITTING A NEURAL FIELD TO A 2D IMAGE</h2>
+      <section>
+        <h3>model architecture</h3>
+
+        <p>
+          for part 1, i used a basic mlp that takes in 2d pixel coordinates
+          (with positional encoding) and predicts the rgb color at each pixel.
+        </p>
+
+        <p>i used positional encoding with L = 10.</p>
+
+        <p>my network had width 256 and looked like this:</p>
+
+        <p>
+          dense(input_dim → 256) → relu<br />
+          dense(256 → 256) → relu<br />
+          dense(256 → 256) → relu<br />
+          dense(256 → 3) → sigmoid
+        </p>
+
+        <p>
+          the sigmoid at the end keeps the output in the range (0, 1), which
+          matches the normalized pixel colors.
+        </p>
+
+        <p>
+          for training, i used: batch size = 10000, 1000 epochs, adam optimizer
+          (learning rate = 5e-4), and MSE loss. every 200 epochs i saved a
+          predicted image to see how the model was learning.
+        </p>
+      </section>
+
+      <section>
+        <h3>training progression on the fox images</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/img_iterations=0.png" />
+            <figcaption>iteration 0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/img_iterations=200.png" />
+            <figcaption>iteration 200</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/img_iterations=400.png" />
+            <figcaption>iteration 400</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/img_iterations=600.png" />
+            <figcaption>iteration 600</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/img_iterations=800.png" />
+            <figcaption>iteration 800</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/img_iterations=1000.png" />
+            <figcaption>iteration 1000</figcaption>
+          </figure>
+        </div>
+
+        <br />
+        <br />
+        <br />
+
+        <h3>training progression on my own (miffy) image</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/miffyimg_iterations=0.png" />
+            <figcaption>iteration 0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/miffyimg_iterations=200.png" />
+            <figcaption>iteration 200</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/miffyimg_iterations=400.png" />
+            <figcaption>iteration 400</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/miffyimg_iterations=600.png" />
+            <figcaption>iteration 600</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/miffyimg_iterations=800.png" />
+            <figcaption>iteration 800</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/miffyimg_iterations=1000.png" />
+            <figcaption>iteration 1000</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h3>hyperparameter comparisons</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/output_w64_L5.png" />
+            <figcaption>L = 5, w = 64</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/output_w64_L15.png" />
+            <figcaption>L = 15, w = 64</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/output_w256_L5.png" />
+            <figcaption>L = 5, w = 256</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/output_w256_L15.png" />
+            <figcaption>L = 15, w = 256</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h3>psnr curve</h3>
+        <figure>
+          <img src="./images/psnr curve_ w=256, L=15.png" />
+          <figcaption>psnr curve for w = 256, L = 15</figcaption>
+        </figure>
+      </section>
+
+      <h2>2. NEURAL RADIANCE FIELD FROM MULTIVIEW IMAGES</h2>
+
+      <section>
+        <h3>implementation summary (2.1–2.5)</h3>
+
+        <p>
+          for 2.1, I wrote functions to move between coordinate spaces.
+          <code>transform()</code> converts camera-space points to world space
+          using homogeneous coordinates and the c2w matrix.
+          <code>pixel_to_camera()</code> undoes the intrinsics by multiplying
+          with <code>inv(K)</code> and scaling by depth. in
+          <code>pixel_to_ray()</code> i take the pixel location, turn it into a
+          direction in camera space, rotate it with the c2w rotation, and repeat
+          the camera center to get the ray origins. this gives a ray origin and
+          normalized ray direction for every pixel.
+        </p>
+
+        <p>
+          for 2.2 + 2.3, i implemented sampling in
+          <code>sample_along_rays()</code> and made it batched to be fast with
+          PyTorch. i made a <code>RaysData</code> class that builds all rays for
+          all images ahead of time. inside the constructor, i create an (H*W)
+          pixel grid, unroll the images, and use <code>pixel_to_ray()</code> for
+          each c2w to precompute <code>rays_o</code>, <code>rays_d</code>, and
+          pixel colors. <code>sample_rays()</code> then just picks random rays
+          from the full set.
+        </p>
+
+        <p>
+          for 2.4, i built the nerf network using three pieces: a base mlp
+          (<code>nerf_base_model</code>) that outputs a 256-dim feature, a
+          density head (<code>nerf_density_model</code>) that predicts sigma,
+          and a color head (<code>nerf_color_model</code>) that predicts rgb
+          from the feature plus the positional-encoded view direction. points
+          use positional encoding with L=10, and directions use L=4.
+        </p>
+
+        <p>
+          for 2.5, i implemented the volume rendering equation in
+          <code>volrend</code>. i convert density to alpha, compute the running
+          transmittance with cumulative products, and take a weighted sum of all
+          sample colors along the ray to get the final pixel color. this is what
+          the training loop compares against the ground truth rgb.
+        </p>
+      </section>
+
+      <section>
+        <h3>rays and samples visualization</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/rays-1.png" />
+            <figcaption>
+              camera frustums + rays just from 1 camera on the lego
+            </figcaption>
+          </figure>
+          <figure>
+            <img src="./images/rays-2.png" />
+            <figcaption>
+              100 randomly sampled rays from all images and 100 cameras on the
+              lego
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h3>training progression</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/ground_truth.png" />
+            <figcaption>ground truth 0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_0.png" />
+            <figcaption>iter 0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_400.png" />
+            <figcaption>iter 400</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_800.png" />
+            <figcaption>iter 800</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_1200.png" />
+            <figcaption>iter 1200</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_1600.png" />
+            <figcaption>iter 1600</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/notrender_step_2000.png" />
+            <figcaption>iter 2000 (PSNR = 23.80)</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h3>psnr curve (validation)</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/nerf_valid.png" />
+            <figcaption>validation psnr (lego)</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h3>spherical rendering video for lego</h3>
+
+        <div
+          style="
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+          "
+        >
+          <video
+            autoplay
+            loop
+            muted
+            playsinline
+            style="max-width: 600px; width: 80%; border-radius: 10px"
+          >
+            <source src="./images/lego_spherical.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
+      <h2>2.6 TRAINING WITH MY OWN DATA</h2>
+
+      <p>
+        i used parameters of far=0.5, near=0.02, batch_size = 10000,
+        steps=10000, num_samples=64, lr=5e-4. most notable of changes were of
+        far and near, which made sense because the scale/proximity my own camera
+        was taking pictures at was different
+      </p>
+
+      <section>
+        <h3>novel view gif</h3>
+        <div
+          style="
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+          "
+        >
+          <video
+            autoplay
+            loop
+            muted
+            playsinline
+            style="max-width: 600px; width: 80%; border-radius: 10px"
+          >
+            <source src="./images/novel_views.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
+      <section>
+        <h3>gif on my own training data</h3>
+        <div
+          style="
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+          "
+        >
+          <video
+            autoplay
+            loop
+            muted
+            playsinline
+            style="max-width: 600px; width: 80%; border-radius: 10px"
+          >
+            <source src="./images/miffy.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
+      <section>
+        <h3>training loss curve</h3>
+        <figure>
+          <img src="./images/loss_2.6.png" />
+          <figcaption>training loss</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h3>psnr curve</h3>
+        <figure>
+          <img src="./images/psnr_2.6.png" />
+          <figcaption>psnr for my image</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h3>intermediate renders</h3>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/2.6-1000.png" />
+            <figcaption>iteration 1000</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/2.6-5000.png" />
+            <figcaption>iteration 5000</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/2.6-10000.png" />
+            <figcaption>iteration 10000</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
