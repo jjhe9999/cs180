@@ -1,0 +1,1132 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>proj 5 — the power of diffusion models</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+
+  <body>
+    <div class="return-home-container">
+      <a class="button" href="../index.html">home</a>
+    </div>
+
+    <h1 class="project-title">proj 5: the power of diffusion models</h1>
+
+    <h1> <i>part A</i> </h1>
+
+    <div class="proj-one-container">
+      <h2>part 0: setup</h2>
+
+      <section>
+        <p>
+          here are some interesting text prompts i used to generate prompt
+          embeddings with:
+        </p>
+
+        <ul>
+          <li>prompt 1: <i>cute cat in teacup</i></li>
+          <li>prompt 2: <i>flaky buttery croissant with cross section</i></li>
+          <li>prompt 3: <i>snowy winter mountains during sunset</i></li>
+        </ul>
+        <br />
+        <p>
+          for each of the 3 prompts above, i used 10 and then 50 inference steps. using more inference steps seemed to make the model adhere more to the prompt, 
+          and appear more "realistic" when i used less steps. for example with the kitten, its fur looks more real in 10 steps. but at the same time, 50 steps produces
+          a lot more details seen by the background of the kitten (to make it more "cute?"), and the croissant which in general has more detail.
+        </p>
+
+        <div class="results-grid">
+          <figure>
+            <img src="./images/cat-10.png" />
+            <figcaption>prompt 1 — 10 iterations</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/croissant-10.png" />
+            <figcaption>prompt 2 — 10 iterations</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/snowy-10.png" />
+            <figcaption>prompt 3 — 10 iterations</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/cat-50.png" />
+            <figcaption>prompt 1 — 50 iterations</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/croissant-50.png" />
+            <figcaption>prompt 2 — 50 iterations</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/snowy-50.png" />
+            <figcaption>prompt 3 — 50 iterations</figcaption>
+          </figure>
+        </div>
+
+        <p>
+          for the rest of the project, i used a seed value of 28.
+        </p>
+      </section>
+
+      <br />
+      <br />
+
+
+      <h2>part 1.1: implementing the forward process</h2>
+      <section>
+        <p> here is my implementation of the forward function:</p>
+        <code>
+          def forward(im, t):
+            with torch.no_grad():
+              alphas_cumprod_t = alphas_cumprod[t]
+              im_noisy = torch.sqrt(alphas_cumprod_t) * im + torch.sqrt(1 - alphas_cumprod_t) * torch.randn_like(im)
+            return im_noisy
+        </code>
+
+        <br />
+        <br />
+        <p> here is the Campanile at different noise levels:</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/forward_noise_level=250.png" />
+            <figcaption>Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=500.png" />
+            <figcaption>Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=750.png" />
+            <figcaption>Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+      </section>
+      <br />
+      <br />
+      <h2>part 1.2: classical denoising</h2>
+      <section>
+        <p> here are the noisy vs Gaussian-denoised versions of the Campanile:</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/forward_noise_level=250.png" />
+            <figcaption>noisy Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=500.png" />
+            <figcaption>noisy Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=750.png" />
+            <figcaption>noisy Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/gaussian_blur_noise_level=250.png" />
+            <figcaption>Gaussian-denoised Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/gaussian_blur_noise_level=500.png" />
+            <figcaption>Gaussian-denoised Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/gaussian_blur_noise_level=750.png" />
+            <figcaption>Gaussian-denoised Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+      </section>
+      <br />
+      <br />
+      <h2>part 1.3: one-step denoising</h2>
+      <section>
+        <p> here are the noisy vs one-step-denoised versions of the Campanile:</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/forward_noise_level=250.png" />
+            <figcaption>noisy Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=500.png" />
+            <figcaption>noisy Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/forward_noise_level=750.png" />
+            <figcaption>noisy Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/one-step-250.png" />
+            <figcaption>one-step-denoised Campanile at t = 250</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/one-step-500.png" />
+            <figcaption>one-step-denoised Campanile at t = 500</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/one-step-750.png" />
+            <figcaption>one-step-denoised Campanile at t = 750</figcaption>
+          </figure>
+        </div>
+      </section>
+      <br />
+      <br />
+      <h2>part 1.4: iterative denoising</h2>
+      <section>
+        <p> here are some of my results from iterative denoising:</p>
+
+        <br />
+        <p> here is the Campanile every 5th loop of denoising, which corresponded to the following timesteps:</p>
+
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.4-90.png" />
+            <figcaption>t = 90</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-240.png" />
+            <figcaption>t = 240</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-390.png" />
+            <figcaption>t = 390</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-540.png" />
+            <figcaption>t = 540</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-690.png" />
+            <figcaption>t = 690</figcaption>
+          </figure>
+        </div>
+        <br />
+        <br />
+        <p> let's compare some of the clean images here:</p>
+
+        <div class="results-grid">
+          <figure>
+            <img src="./images/campanile.jpg" />
+            <figcaption>original image</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-iterative-v2.png" />
+            <figcaption>iteratively denoised Campanile</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-one-step-v2.png" />
+            <figcaption>one-step-denoised Campanile</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.4-gaussian-v2.png" />
+            <figcaption>Gaussian blurred Campanile</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.5: diffusion model sampling</h2>
+      <section>
+        <p> here are 5 sampled images using the diffusion model:</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.5-1.png" />
+            <figcaption>sample 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.5-2.png" />
+            <figcaption>sample 2</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.5-3.png" />
+            <figcaption>sample 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.5-4.png" />
+            <figcaption>sample 4</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.5-5.png" />
+            <figcaption>sample 5</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.6: classifier-free guidance</h2>
+      <section>
+        <p> in this part, i implemented the <code>iterative_denoise_cfg</code> function. using this function with a scale of 7,
+          here are 5 samples of photos generated on the prompt "a high quality photo": to me, they looked more "high quality" than 
+        1.5 with vivid and contrastable objects and colors.</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.6-1.png" />
+            <figcaption>sample 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.6-2.png" />
+            <figcaption>sample 2</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.6-3.png" />
+            <figcaption>sample 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.6-4.png" />
+            <figcaption>sample 4</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.6-5.png" />
+            <figcaption>sample 5</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.7: image-to-image translation</h2>
+      <section>
+        <p> here are edits of the Campanile at different noise levels with the conditional "a high quality photo" text prompt</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7-start=1.png" />
+            <figcaption>campanile, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-start=3.png" />
+            <figcaption>campanile, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-start=5.png" />
+            <figcaption>campanile, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-start=7.png" />
+            <figcaption>campanile, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-start=10.png" />
+            <figcaption>campanile, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-start=20.png" />
+            <figcaption>campanile, i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/campanile.jpg" />
+            <figcaption>campanile, original</figcaption>
+          </figure>
+        </div>
+        <br />
+        <p> in addition, here's the same process repeated on two of my own chosen images:</p>
+        <br />
+        <p>chosen image #1: snowy mountains in a sunset</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7-snowy-start=1.png" />
+            <figcaption>snowy mountains, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-start=3.png" />
+            <figcaption>snowy mountains, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-start=5.png" />
+            <figcaption>snowy mountains, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-start=7.png" />
+            <figcaption>snowy mountains, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-start=10.png" />
+            <figcaption>snowy mountains, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-start=20.png" />
+            <figcaption>snowy mountains, i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-snowy-og.png" />
+            <figcaption>snowy mountains, original</figcaption>
+          </figure>
+        </div>
+        <br />
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/p0_prompt1.png" />
+            <figcaption>chosenimg2, i_start = 1</figcaption>
+          </figure>
+        </div>
+        <br />
+        <p>chosen image #2: a cross section of a croissant</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7-croissant-start=1.png" />
+            <figcaption>croissant, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-start=3.png" />
+            <figcaption>croissant, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-start=5.png" />
+            <figcaption>croissant, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-start=7.png" />
+            <figcaption>croissant, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-start=10.png" />
+            <figcaption>croissant, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-start=20.png" />
+            <figcaption>croissant, i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7-croissant-og.png" />
+            <figcaption>croissant, original</figcaption>
+          </figure>
+        </div>
+        <br />
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/p0_prompt1.png" />
+            <figcaption>chosenimg2, i_start = 1</figcaption>
+          </figure>
+        </div>
+        <br />
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.7.1: editing hand-drawn and web images</h2>
+      <section>
+        <h3> web image:</h3>
+        <p> i chose this image of Gru from the web, and here are the resultant edits at different noise levels:</p>
+          <div class="results-grid">
+            <figure>
+              <img src="./images/gru-1.png" />
+              <figcaption>web image of gru, i_start = 1</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru-3.png" />
+              <figcaption>web image of gru, i_start = 3</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru-5.png" />
+              <figcaption>web image of gru, i_start = 5</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru-7.png" />
+              <figcaption>web image of gru, i_start = 7</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru-10.png" />
+              <figcaption>web image of gru, i_start = 10</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru-20.png" />
+              <figcaption>web image of gru, i_start = 20</figcaption>
+            </figure>
+            <figure>
+              <img src="./images/gru.png" />
+              <figcaption>web image of gru, original</figcaption>
+            </figure>
+        </div>
+        <br />
+        <h3> hand-drawn images:</h3>
+        <p> here are two of my hand-drawn images, with resultant edits at different noise levels:</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7.1-flowers-start=1.png" />
+            <figcaption>hand-drawn flower image, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-start=3.png" />
+            <figcaption>hand-drawn flower image, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-start=5.png" />
+            <figcaption>hand-drawn flower image, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-start=7.png" />
+            <figcaption>hand-drawn flower image, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-start=10.png" />
+            <figcaption>hand-drawn flower image, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-start=20.png" />
+            <figcaption>hand-drawn flower image, i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-flowers-og.png" />
+            <figcaption>original hand-drawn image of flowers</figcaption>
+          </figure>
+        </div>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7.1-bird-start=1.png" />
+            <figcaption>hand-drawn bird image, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-start=3.png" />
+            <figcaption>hand-drawn bird image, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-start=5.png" />
+            <figcaption>hand-drawn bird image, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-start=7.png" />
+            <figcaption>hand-drawn bird image, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-start=10.png" />
+            <figcaption>hand-drawn bird image, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-start=20.png" />
+            <figcaption>hand-drawn bird image, i_start = 20</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.1-bird-og.png" />
+            <figcaption>original hand-drawn image of a bird</figcaption>
+          </figure>
+        </div>
+      </section>
+      
+
+
+      <br />
+      <br />
+      <h2>part 1.7.2: inpainting</h2>
+      <section>
+        <p> here is an inpainted campanile with the provided mask</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/campanile.jpg" />
+            <figcaption>Campanile original</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/campanile-mask.png" />
+            <figcaption>mask</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/campanile-to-replace.png" />
+            <figcaption>hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.2.png" />
+            <figcaption>Campanile inpainted</figcaption>
+          </figure>
+        </div>
+        <br />
+        <p> in addition, here's the same process repeated on two of my own chosen images:</p>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/houses.png" />
+            <figcaption>houses scene original</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/houses-mask.png" />
+            <figcaption>mask</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/houses-to-replace.png" />
+            <figcaption>hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.2-houses.png" />
+            <figcaption>houses inpainted</figcaption>
+          </figure>
+        </div>
+        <br />
+        <div class="results-grid">
+          <figure>
+            <img src="./images/waterfall.png" />
+            <figcaption>waterfall scene original</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/waterfall-mask.png" />
+            <figcaption>mask</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/waterfall-to-replace.png" />
+            <figcaption>hole to fill</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.2-waterfall.png" />
+            <figcaption>waterfall inpainted</figcaption>
+          </figure>
+        </div>
+        <br />
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.7.3: text-conditional image-to-image translation</h2>
+      <section>
+        <h3> web image:</h3>
+        <p> here is the campanile, edited at different starts with the prompt "a white spaceship"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7.3-shapeship-1.png" />
+            <figcaption>campanile x spaceship, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-shapeship-3.png" />
+            <figcaption>campanile x spaceship, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-shapeship-5.png" />
+            <figcaption>campanile x spaceship, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-shapeship-7.png" />
+            <figcaption>campanile x spaceship, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-shapeship-10.png" />
+            <figcaption>campanile x spaceship, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-shapeship-20.png" />
+            <figcaption>campanile x spaceship, i_start = 20</figcaption>
+          </figure>
+        </div>
+        <br />
+        
+        <p> here is a scene of the waterfall, edited at different starts with the prompt "a luxurious white car"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7.3-car-1.png" />
+            <figcaption>waterfall x car, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-car-3.png" />
+            <figcaption>waterfall x car, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-car-5.png" />
+            <figcaption>waterfall x car, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-car-7.png" />
+            <figcaption>waterfall x car, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-car-10.png" />
+            <figcaption>waterfall x car, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-car-20.png" />
+            <figcaption>waterfall x car, i_start = 20</figcaption>
+          </figure>
+          
+        </div>
+        <br />
+        <p> here is a scene of houses, edited at different starts with the prompt "a big barn door surrounded by flowers"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.7.3-door-1.png" />
+            <figcaption>houses x barn door, i_start = 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-door-3.png" />
+            <figcaption>houses x barn door, i_start = 3</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-door-5.png" />
+            <figcaption>houses x barn door, i_start = 5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-door-7.png" />
+            <figcaption>houses x barn door, i_start = 7</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-door-10.png" />
+            <figcaption>houses x barn door, i_start = 10</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.7.3-door-20.png" />
+            <figcaption>houses x barn door, i_start = 20</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      
+      <br />
+      <br />
+      <h2>part 1.8: visual anagrams</h2>
+      <section>
+        <p>here is one (upsampled) visual anagram i made by using embeddings from these two prompts: "a painting of a car" and "a painting of a bird"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.8-car-bird-256.png" />
+            <figcaption>painting of car + painting of bird visual anagram</figcaption>
+          </figure>
+        </div>
+        <br />
+        <p>here is another (upsampled) visual anagram i made by using embeddings from these two prompts: "a painting of a mountain range" and "a side profile"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.8-2-256.png" />
+            <figcaption>mountain range painting + side profile visual anagram</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <br />
+      <br />
+      <h2>part 1.9: hybrid images</h2>
+      <section>
+        <p>for the hybrid images, i chose to stick with the suggested Gaussian blur with kernel size = 33 and sigma = 2. here are my resultant images:</p>
+        <p>here are two hybrid images i made by using embeddings from these two prompts: "a painting of a car" and "a painting of a bird"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.9-car-bird-256-2.png" />
+            <figcaption>bird/car hybrid 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.9-car-bird-256.png" />
+            <figcaption>bird/car hybrid 2</figcaption>
+          </figure>
+        </div>
+        <br />
+        <p>here are two more hybrid images i made by using embeddings from these two prompts: "a lithograph of waterfalls" and "a lithograph of houseplants"</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1.9-waterfall-houseplant-2.png" />
+            <figcaption>waterfall/houseplant hybrid 1</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1.9-waterfall-houseplant-3.png" />
+            <figcaption>waterfall/houseplant hybrid 2</figcaption>
+          </figure>
+        </div>
+      </section>
+    <br />
+    <br />
+
+    <br />
+    <br />
+
+    <br />
+
+    <h1> <i>part B</i> </h1>
+    
+    <div class="proj-one-container">
+      <h2>part 1.1-1.2: implementing and using a UNet to train a denoiser</h2>
+      <section>
+        <p>
+          For this part, I implemented a UNet and used it to train a denoiser. Below, I show some results of the noising process
+          over several different noise level values:
+        </p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1-2-t=0.0.png" />
+            <figcaption>σ = 0.0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.2.png" />
+            <figcaption>σ = 0.2</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.4.png" />
+            <figcaption>σ = 0.4</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.5.png" />
+            <figcaption>σ = 0.5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.6.png" />
+            <figcaption>σ = 0.6</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.6.png" />
+            <figcaption>σ = 0.8</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-t=0.6.png" />
+            <figcaption>σ = 1.0</figcaption>
+          </figure>
+        </div>
+      </section>
+    </div>
+    <br />
+    <br />
+
+    <h2>part 1.2.1 training</h2>
+      <section>
+      <p> here is a plot of my training loss curve every few iterations during the whole training process when noise is set to σ = 0.5: </p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-1-graph.png" />
+          <figcaption>training loss curve (σ = 0.5)</figcaption>
+        </figure>
+      </div>
+      <p> then after training the model, here are some example results after the FIRST epoch:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-1-epoch=1-clean-1.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-noisy-1.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-denoised-1.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-clean-2.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-noisy-2.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-denoised-2.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-clean-3.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-noisy-3.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=1-denoised-3.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+      </div>
+      <br />
+      <br />
+      <p> then after training the model, here are some example results after the FIFTH epoch:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-1-epoch=5-clean-1.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-noisy-1.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-denoised-1.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-clean-2.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-noisy-2.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-denoised-2.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-clean-3.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-noisy-3.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-1-epoch=5-denoised-3.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+      </div>
+      </section>
+    <br />
+    <br />
+
+    <h2> 1.2.2 OOD testing</h2>
+      <section>
+        <p> here are sample results on the test set with OOD noise levels, and the same image as 1.2. we can see some strange things happening especially as noise levels are higher in the denoising process.</p>
+        <div class="results-grid">
+          <figure>
+            <img src="./images/1-2-2-t=0.0.png" />
+            <figcaption>σ = 0.0</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=0.2.png" />
+            <figcaption>σ = 0.2</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=0.4.png" />
+            <figcaption>σ = 0.4</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=0.5.png" />
+            <figcaption>σ = 0.5</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=0.6.png" />
+            <figcaption>σ = 0.6</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=0.8.png" />
+            <figcaption>σ = 0.8</figcaption>
+          </figure>
+          <figure>
+            <img src="./images/1-2-2-t=1.0.png" />
+            <figcaption>σ = 1.0</figcaption>
+          </figure>
+        </div>
+      </section>
+    <br />
+    <br />
+     
+      <h2>part 1.2.3 denoising pure noise</h2>
+      <section>
+      <p> here is a plot of my training loss curve every few iterations during the whole training process when noise is set to σ = 0.5: </p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-3-graph.png" />
+          <figcaption>training loss curve</figcaption>
+        </figure>
+      </div>
+      <p> 
+        Fromt the generated outputs when denoising ("pure noise"), the image seems to truly get lost. the output can be interpreted as something like a superposition of many numbers,
+        and it seems the output is imprecise in determining the actual value of the output even after 5 epochs, which makes sense because of all of the noise.
+        <br />
+        <br />
+
+        Also here are my sample results on pure noise after the FIRST epoch:
+      </p>
+
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-3-epoch-1-clean-2.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch-1-noisy-2.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch-1-denoised-2.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-clean-1.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-noisy-1.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-denoised-1.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-clean-3.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-noisy-3.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-denoised-3.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+      </div>
+
+      <p> and here are my results for the fifth epoch:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/1-2-3-epoch-1-clean-2.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch-1-noisy-2.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch-5-denoised-2.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-clean-1.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-noisy-1.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=5-denoised-1.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-clean-3.png" />
+          <figcaption>clean image</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=1-noisy-3.png" />
+          <figcaption>noisy image (σ = 0.5)</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/1-2-3-epoch=5-denoised-3.png" />
+          <figcaption>denoised image</figcaption>
+        </figure>
+      </div>
+      </section>
+      <br/>
+      <br/>
+
+      <h2> part 2.2 training the time-conditioned unet </h2>
+      <section>
+      <p> here is my training loss curve plot for the time-conditioned UNet:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-2-graph.png" />
+          <figcaption>training loss curve (σ = 0.5)</figcaption>
+        </figure>
+      </div>
+      </section>
+      <br/>
+      <br/>
+      <h2> part 2.3 sampling from the time-conditioned UNet </h2>
+      <section>
+      <p> here are my results for sampling from the time-conditioned UNet for 1, 5, and 10 epochs:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-3-epoch-1.png" />
+          <figcaption>results from epoch 1</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-3-epoch-5.png" />
+          <figcaption>results from epoch 5</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-3-epoch-10.png" />
+          <figcaption>results from epoch 10</figcaption>
+        </figure>
+      </div>
+      </section>
+      <br/>
+      <br/>
+      <h2> part 2.5 training the class-conditioned unet </h2>
+      <section>
+      <p> here is my training loss curve plot for the class-conditioned UNet:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-5-graph.png" />
+          <figcaption>training loss curve (σ = 0.5)</figcaption>
+        </figure>
+      </div>
+      </section>
+      <br/>
+      <br/>
+      <h2> part 2.6 sampling from the time-conditioned UNet </h2>
+      <section>
+      <p> here are my results for sampling from the class-conditioned UNet for 1, 5, and 10 epochs:</p>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-1.png" />
+          <figcaption>results from epoch 1</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-5.png" />
+          <figcaption>results from epoch 5</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-10.png" />
+          <figcaption>results from epoch 10</figcaption>
+        </figure>
+      </div>
+      
+      <br />
+      <p>then, i got rid of the learning rate scheduler. i made two changes to compensate for the loss:
+        the first change was to decrease the learning rate because eventually as epochs continue, our steps would be normally
+        too big if the learning rate isn't going to decay anymore. 
+        <br />
+        <br />
+
+        the second step was to clip the gradient's magnitudes, once again to kind of compensate for the lack of "decay" going on. by using 
+        <code>torch.nn.utils.cli-grad_norm</code>, we can try to scale down the gradient if the norm is too big and avoid unstable training/any explosions
+        .
+        <br />
+        <br />
+
+        here are my results after removing the scheduler and adding in these new changes. to me, they look pretty solid, and one main difference between the resutls now and before,
+        at least visually, are that the numbers are a lot less "thicker" and "fatter", which i interpret as more "confidence" in this new model in what a digit "looks like". here is a side-by-side comparison:
+      </p>
+      <br />
+
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-1.png" />
+          <figcaption>results from epoch 1</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/2-6-epoch-1-no-scheduler.png" />
+          <figcaption>results from epoch 1 (no scheduler)</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-5.png" />
+          <figcaption>results from epoch 5</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/2-6-epoch-5-no-scheduler.png" />
+          <figcaption>results from epoch 5 (no scheduler)</figcaption>
+        </figure>
+      </div>
+      <div class="results-grid">
+        <figure>
+          <img src="./images/2-6-epoch-10.png" />
+          <figcaption>results from epoch 10</figcaption>
+        </figure>
+        <figure>
+          <img src="./images/2-6-epoch-10-no-scheduler.png" />
+          <figcaption>results from epoch 10</figcaption>
+        </figure>
+      </div>
+      </section>
+
+
+  </body>
+</html>
